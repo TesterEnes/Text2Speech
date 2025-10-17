@@ -12,6 +12,8 @@ if (recognition) {
 const SpeechConverter = () => {
   const [isListening, setIsListening] = useState(false);
   const [text, setText] = useState('Konuşmak için "Kaydı Başlat" düğmesine basın veya metni buraya yazın.');
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
 
   useEffect(() => {
     if (!recognition) return;
@@ -26,6 +28,22 @@ const SpeechConverter = () => {
       console.error('Speech Recognition Error', event.error);
       setIsListening(false);
     };
+
+    // Sesleri yükle
+    const populateVoiceList = () => {
+      const availableVoices = window.speechSynthesis.getVoices();
+      setVoices(availableVoices);
+      // Varsayılan olarak bir ses seç
+      if (availableVoices.length > 0) {
+        const defaultVoice = availableVoices.find(voice => voice.lang === 'tr-TR') || availableVoices[0];
+        setSelectedVoice(defaultVoice.name);
+      }
+    };
+
+    populateVoiceList();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
 
   }, []);
 
@@ -54,6 +72,10 @@ const SpeechConverter = () => {
       return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
+    const voice = voices.find(v => v.name === selectedVoice);
+    if (voice) {
+      utterance.voice = voice;
+    }
     utterance.lang = 'tr-TR';
     window.speechSynthesis.speak(utterance);
   };
@@ -69,6 +91,16 @@ const SpeechConverter = () => {
         cols="50"
         style={{ marginTop: '20px', padding: '10px' }}
       />
+      <div style={{ marginTop: '20px' }}>
+        <label htmlFor="voice-select" style={{ marginRight: '10px' }}>Ses Seçin:</label>
+        <select id="voice-select" value={selectedVoice || ''} onChange={(e) => setSelectedVoice(e.target.value)} style={{ marginRight: '20px', padding: '5px' }}>
+          {voices.filter(voice => voice.lang.startsWith('tr')).map((voice) => (
+            <option key={voice.name} value={voice.name}>
+              {voice.name} ({voice.lang})
+            </option>
+          ))}
+        </select>
+      </div>
       <div style={{ marginTop: '20px' }}>
         <button onClick={handleListen} style={{ marginRight: '10px', padding: '10px 20px' }}>
           {isListening ? 'Kaydı Durdur' : 'Kaydı Başlat'}
