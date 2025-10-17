@@ -94,7 +94,7 @@ const SpeechConverter = () => {
       <div style={{ marginTop: '20px' }}>
         <label htmlFor="voice-select" style={{ marginRight: '10px' }}>Ses Seçin:</label>
         <select id="voice-select" value={selectedVoice || ''} onChange={(e) => setSelectedVoice(e.target.value)} style={{ marginRight: '20px', padding: '5px' }}>
-          {voices.filter(voice => voice.lang.startsWith('tr')).map((voice) => (
+          {voices.map((voice) => (
             <option key={voice.name} value={voice.name}>
               {voice.name} ({voice.lang})
             </option>
