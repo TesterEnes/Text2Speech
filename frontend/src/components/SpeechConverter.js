@@ -15,6 +15,7 @@ const SpeechConverter = () => {
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
 
+  // Ses tanıma için Effect
   useEffect(() => {
     if (!recognition) return;
 
@@ -28,12 +29,13 @@ const SpeechConverter = () => {
       console.error('Speech Recognition Error', event.error);
       setIsListening(false);
     };
+  }, []);
 
-    // Sesleri yükle
+  // Ses sentezleme (TTS) seslerini yüklemek için Effect
+  useEffect(() => {
     const populateVoiceList = () => {
       const availableVoices = window.speechSynthesis.getVoices();
       setVoices(availableVoices);
-      // Varsayılan olarak bir ses seç
       if (availableVoices.length > 0) {
         const defaultVoice = availableVoices.find(voice => voice.lang === 'tr-TR') || availableVoices[0];
         setSelectedVoice(defaultVoice.name);
@@ -45,6 +47,9 @@ const SpeechConverter = () => {
       window.speechSynthesis.onvoiceschanged = populateVoiceList;
     }
 
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    }
   }, []);
 
   const handleListen = () => {
@@ -76,6 +81,7 @@ const SpeechConverter = () => {
     if (voice) {
       utterance.voice = voice;
     }
+    // Seçilen sesin dilini kullanmak daha doğru olur, ancak şimdilik TR varsayalım.
     utterance.lang = 'tr-TR';
     window.speechSynthesis.speak(utterance);
   };
