@@ -11,7 +11,7 @@ if (recognition) {
 
 const SpeechConverter = () => {
   const [isListening, setIsListening] = useState(false);
-  const [text, setText] = useState('Konuşmak için "Kaydı Başlat" düğmesine basın.');
+  const [text, setText] = useState('Konuşmak için "Kaydı Başlat" düğmesine basın veya metni buraya yazın.');
 
   useEffect(() => {
     if (!recognition) return;
@@ -44,10 +44,24 @@ const SpeechConverter = () => {
     }
   };
 
+  const handleSpeak = () => {
+    if (!('speechSynthesis' in window)) {
+      alert('Üzgünüz, tarayıcınız metin okumayı desteklemiyor.');
+      return;
+    }
+    if (!text || text === 'Dinleniyor...' || text === 'Konuşmak için \"Kaydı Başlat\" düğmesine basın veya metni buraya yazın.') {
+      alert('Lütfen seslendirilecek bir metin girin.');
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'tr-TR';
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>Sesi Metne Dönüştür</h1>
-      <p>Bu uygulama, Web Speech API ile sesi metne dönüştürür.</p>
+      <h1>Sesi Metne & Metni Sese Dönüştür</h1>
+      <p>Bu uygulama, Web Speech API ile sesi metne dönüştürür ve metni seslendirir.</p>
       <textarea 
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -56,8 +70,11 @@ const SpeechConverter = () => {
         style={{ marginTop: '20px', padding: '10px' }}
       />
       <div style={{ marginTop: '20px' }}>
-        <button onClick={handleListen} style={{ padding: '10px 20px' }}>
+        <button onClick={handleListen} style={{ marginRight: '10px', padding: '10px 20px' }}>
           {isListening ? 'Kaydı Durdur' : 'Kaydı Başlat'}
+        </button>
+        <button onClick={handleSpeak} style={{ padding: '10px 20px' }}>
+          Metni Oku
         </button>
       </div>
     </div>
